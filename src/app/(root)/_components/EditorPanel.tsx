@@ -2,7 +2,7 @@
 import { useCodeEditorStore } from "@/store/useCodeEditorStore";
 import { useEffect, useState } from "react";
 import { defineMonacoThemes, LANGUAGE_CONFIG } from "../_constants";
-import { Editor } from "@monaco-editor/react";
+import { Editor, OnMount } from "@monaco-editor/react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { RotateCcwIcon, ShareIcon, TypeIcon } from "lucide-react";
@@ -10,25 +10,22 @@ import { useClerk } from "@clerk/nextjs";
 import { EditorPanelSkeleton } from "./EditorPanelSkeleton";
 import useMounted from "@/hooks/useMounted";
 import ShareSnippetDialog from "./ShareSnippetDialog";
-import * as monaco from 'monaco-editor';
+import { editor } from 'monaco-editor';
 
 function EditorPanel() {
   const clerk = useClerk();
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const { language, theme, fontSize, editor, setFontSize, setEditor } = useCodeEditorStore();
+  const { language, theme, fontSize, editor: editorInstance, setFontSize, setEditor } = useCodeEditorStore();
 
   const mounted = useMounted();
 
   useEffect(() => {
     const savedCode = localStorage.getItem(`editor-code-${language}`);
     const newCode = savedCode || LANGUAGE_CONFIG[language].defaultCode;
-    if (editor) {
-      const model = editor.getModel();
-      if (model) {
-        model.setValue(newCode);
-      }
+    if (editorInstance) {
+      editorInstance.setValue(newCode);
     }
-  }, [language, editor]);
+  }, [language, editorInstance]);
 
   useEffect(() => {
     const savedFontSize = localStorage.getItem("editor-font-size");
@@ -37,11 +34,8 @@ function EditorPanel() {
 
   const handleRefresh = () => {
     const defaultCode = LANGUAGE_CONFIG[language].defaultCode;
-    if (editor) {
-      const model = editor.getModel();
-      if (model) {
-        model.setValue(defaultCode);
-      }
+    if (editorInstance) {
+      editorInstance.setValue(defaultCode);
     }
     localStorage.removeItem(`editor-code-${language}`);
   };
@@ -54,6 +48,11 @@ function EditorPanel() {
     const size = Math.min(Math.max(newSize, 12), 24);
     setFontSize(size);
     localStorage.setItem("editor-font-size", size.toString());
+  };
+
+  const handleEditorMount: OnMount = (editor) => {
+    setEditor(editor);
+    editor.setValue(LANGUAGE_CONFIG[language].defaultCode);
   };
 
   if (!mounted) return null;
@@ -73,7 +72,6 @@ function EditorPanel() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            
             <div className="flex items-center gap-3 px-3 py-2 bg-[#1e1e2e] rounded-lg ring-1 ring-white/5">
               <TypeIcon className="size-4 text-gray-400" />
               <div className="flex items-center gap-3">
@@ -101,13 +99,11 @@ function EditorPanel() {
               <RotateCcwIcon className="size-4 text-gray-400" />
             </motion.button>
 
-            
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setIsShareDialogOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg overflow-hidden bg-gradient-to-r
-               from-blue-500 to-blue-600 opacity-90 hover:opacity-100 transition-opacity"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 opacity-90 hover:opacity-100 transition-opacity"
             >
               <ShareIcon className="size-4" />
               <span className="text-sm font-medium">Share</span>
@@ -122,13 +118,7 @@ function EditorPanel() {
             defaultLanguage={language}
             theme={theme}
             onChange={handleEditorChange}
-            onMount={(editor) => {
-              setEditor(editor);
-              const model = editor.getModel();
-              if (model) {
-                model.setValue(LANGUAGE_CONFIG[language].defaultCode);
-              }
-            }}
+            onMount={handleEditorMount}
             options={{
               fontSize,
               minimap: { enabled: false },
@@ -151,10 +141,9 @@ function EditorPanel() {
         </div>
       </div>
 
-      <ShareSnippetDialog
-        isOpen={isShareDialogOpen}
-        onClose={() => setIsShareDialogOpen(false)}
-      />
+      {isShareDialogOpen && (
+        <ShareSnippetDialog onClose={() => setIsShareDialogOpen(false)} />
+      )}
     </div>
   );
 }
