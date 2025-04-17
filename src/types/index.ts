@@ -1,11 +1,7 @@
 import { editor } from 'monaco-editor';
 import { Id } from "../../convex/_generated/dataModel";
 
-export interface Theme {
-  id: string;
-  label: string;
-  color: string;
-}
+export type Theme = editor.BuiltinTheme;
 
 export interface Language {
   id: string;
@@ -42,7 +38,7 @@ export interface CodeEditorState {
   output: string;
   isRunning: boolean;
   error: string | null;
-  theme: string;
+  theme: Theme;
   fontSize: number;
   editor: editor.IStandaloneCodeEditor | null;
   executionResult: ExecutionResult | null;
@@ -50,7 +46,7 @@ export interface CodeEditorState {
   setEditor: (editor: editor.IStandaloneCodeEditor) => void;
   getCode: () => string;
   setLanguage: (language: string) => void;
-  setTheme: (theme: string) => void;
+  setTheme: (theme: Theme) => void;
   setFontSize: (fontSize: number) => void;
   runCode: () => Promise<void>;
 }
