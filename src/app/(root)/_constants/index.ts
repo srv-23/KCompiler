@@ -1,6 +1,3 @@
-import { Monaco } from "@monaco-editor/react";
-import { Theme } from "../../../types";
-
 type LanguageConfig = Record<
   string,
   {

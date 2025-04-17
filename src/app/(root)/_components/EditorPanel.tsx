@@ -8,6 +8,7 @@ import Image from "next/image";
 import { RotateCcwIcon, ShareIcon, TypeIcon } from "lucide-react";
 import useMounted from "@/hooks/useMounted";
 import ShareSnippetDialog from "./ShareSnippetDialog";
+import { editor } from 'monaco-editor';
 
 function EditorPanel() {
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
@@ -47,7 +48,7 @@ function EditorPanel() {
   };
 
   const handleEditorMount: OnMount = (editor) => {
-    setEditor(editor);
+    setEditor(editor as editor.IStandaloneCodeEditor);
     editor.setValue(LANGUAGE_CONFIG[language].defaultCode);
   };
 
@@ -112,7 +113,7 @@ function EditorPanel() {
           <Editor
             height="60vh"
             defaultLanguage={language}
-            theme={theme}
+            theme={theme as editor.BuiltinTheme}
             onChange={handleEditorChange}
             onMount={handleEditorMount}
             options={{

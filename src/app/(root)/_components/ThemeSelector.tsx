@@ -3,7 +3,7 @@
 import { useCodeEditorStore } from "@/store/useCodeEditorStore";
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { CircleOff, Cloud, Github, Laptop, Moon, Palette, Sun } from "lucide-react";
+import { CircleOff, Cloud, Laptop, Moon, Palette, Sun } from "lucide-react";
 import useMounted from "@/hooks/useMounted";
 import { editor } from 'monaco-editor';
 
